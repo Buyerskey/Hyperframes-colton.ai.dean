@@ -1,44 +1,38 @@
-<!-- HYPERFRAMES_SETUP_INCOMPLETE -->
-<!-- ^ Leave this marker until /setup is complete. It tells Claude to greet a new user
-     and run onboarding before any video work. The setup skill removes it when finished. -->
-
-# Creator Profile — _(your name)_
+# Creator Profile — Manny | BuyersKey
 
 Your identity, positioning, and workflow for video work in this workspace. **Read this before every video task** (alongside `PREFERENCES.md`). Use it for on-screen text, niche framing, and workflow assumptions.
 
-> 🚧 **This file is a blank template.** Run `/setup` (or just tell Claude "help me get set up") and it will fill these sections in from a short interview. You can also edit it by hand any time.
-
 ## Identity
 
-- **Name on-screen**: _(your display name)_
-- **Instagram**: _(@handle or "—")_
-- **TikTok**: _(handle or "—")_
-- **YouTube**: _(handle or "—")_
-- **X / other**: _(handle or "—")_
+- **Name on-screen**: Manny | BuyersKey
+- **Instagram**: @propertywithmanny
+- **TikTok**: —
+- **YouTube**: —
+- **X / other**: —
 
 When putting handles on-screen (lower-thirds, outros, end-cards), use the platform-appropriate handle.
 
 ## Platform priority
 
-_(Which platform(s) matter most, and the default aspect ratio. Most short-form creators default to **9:16 vertical, 1080×1920**. Set during /setup.)_
+Cross-post all (Instagram Reels + TikTok + YouTube Shorts). Default aspect ratio: **9:16 vertical, 1080×1920**.
 
 ## Content niche
 
-_(What you make videos about — e.g. AI tools, fitness, cooking, finance, comedy. Set during /setup. When planning a new video, the assistant assumes this niche unless told otherwise.)_
+Real estate / property buying — buyer's agent, Australian property market, home buying tips, and property strategy.
 
 ## On-camera mix
 
-_(Do you appear on camera, go faceless, or both? Set during /setup.)_
+Both — face-cam videos and faceless motion-graphic videos depending on the project.
 
 - **Face-cam** → use `/short-form-video` face-mode choreography (BOTTOM / FULLSCREEN modes).
 - **Faceless** → motion graphics + AI TTS narration (`npx hyperframes tts`) or screen-recordings.
 
 ## Workflow — division of labor
 
-_(Set during /setup. Two common modes:)_
+Mixed workflow depending on the video:
 
-- **You record + pre-edit your own speaking video** → it's the source of truth; the assistant builds the visual layer on top and does NOT cut your audio, remove pauses, or change your pacing.
-- **You build from scratch with the assistant** → motion graphics, TTS narration, screen-recordings assembled together.
+- **When Manny records + pre-edits his own speaking video** → it's the source of truth; the assistant builds the visual layer on top and does NOT cut audio, remove pauses, or change pacing.
+- **When building from scratch** → motion graphics, TTS narration, and screen-recordings assembled together.
 
 ## Brand identity
 
