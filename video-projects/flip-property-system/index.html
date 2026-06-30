@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,900;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/brand-tokens.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      overflow: hidden;
+      font-family: 'Montserrat', system-ui, sans-serif;
+    }
+
+    #flip-system {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #0a0a0f;
+    }
+
+    /* ── Face-cam base ── */
+    #face-cam {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    /* ── Always-on vignette ── */
+    .vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.72) 100%);
+      pointer-events: none;
+    }
+
+    /* ── Grain overlay (SVG noise) ── */
+    .grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.045;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+      pointer-events: none;
+    }
+
+    /* ── Chapter backlights (devinjatha-style) ── */
+    .backlight {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .backlight-red {
+      background:
+        radial-gradient(ellipse 600px 400px at 50% 100%, rgba(220,38,38,0.35) 0%, transparent 80%),
+        radial-gradient(ellipse 400px 300px at 50% 0%,   rgba(220,38,38,0.18) 0%, transparent 70%);
+    }
+    .backlight-gold {
+      background:
+        radial-gradient(ellipse 600px 400px at 50% 100%, rgba(201,162,76,0.30) 0%, transparent 80%),
+        radial-gradient(ellipse 400px 300px at 50% 0%,   rgba(201,162,76,0.15) 0%, transparent 70%);
+    }
+    .backlight-blue {
+      background:
+        radial-gradient(ellipse 700px 450px at 50% 100%, rgba(41,171,226,0.32) 0%, transparent 80%),
+        radial-gradient(ellipse 500px 350px at 50% 0%,   rgba(41,171,226,0.16) 0%, transparent 70%);
+    }
+    .backlight-cta {
+      background:
+        radial-gradient(ellipse 800px 600px at 50% 100%, rgba(41,171,226,0.50) 0%, transparent 75%),
+        radial-gradient(ellipse 600px 400px at 50% 0%,   rgba(201,162,76,0.20) 0%, transparent 70%);
+    }
+
+    /* ── Kinetic text slams ── */
+    .kinetic-text {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-style: italic;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      pointer-events: none;
+      opacity: 0;
+      text-shadow: 0 0 40px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.8);
+    }
+    .kinetic-text.accent {
+      color: #29ABE2;
+    }
+    .kinetic-text.gold {
+      color: #C9A24C;
+    }
+    .kinetic-text.red-accent {
+      color: #ef4444;
+    }
+    .kinetic-bar {
+      display: inline-block;
+      background: #29ABE2;
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    /* ── Caption track ── */
+    .caption {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 54px;
+      line-height: 1.15;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      pointer-events: none;
+      opacity: 0;
+      /* Caption box */
+      background: rgba(0,0,0,0.55);
+      border-radius: 12px;
+      padding: 14px 24px;
+      backdrop-filter: blur(2px);
+    }
+    .caption .hl {
+      color: #29ABE2;
+    }
+    .caption .hl-gold {
+      color: #C9A24C;
+    }
+    .caption .hl-red {
+      color: #ef4444;
+    }
+
+    /* ── B-roll data cards ── */
+    .data-card {
+      position: absolute;
+      left: 54px;
+      right: 54px;
+      background: rgba(10,10,15,0.88);
+      border: 2px solid #29ABE2;
+      border-radius: 20px;
+      padding: 32px 36px;
+      font-family: 'Montserrat', sans-serif;
+      color: #ffffff;
+      pointer-events: none;
+      opacity: 0;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 60px rgba(41,171,226,0.25), 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .data-card-label {
+      font-size: 22px;
+      font-weight: 700;
+      color: #29ABE2;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 18px;
+    }
+    .data-card-title {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(41,171,226,0.2);
+      font-size: 30px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-row-key { color: #94a3b8; font-weight: 700; }
+    .data-row-val { font-weight: 900; color: #ffffff; }
+    .data-row-val.positive { color: #22c55e; }
+    .data-row-val.accent { color: #29ABE2; }
+
+    /* ── Lower third ── */
+    .lower-third {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .lower-third-inner {
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 40%, #0a0a0f 100%);
+      padding: 60px 60px 80px;
+    }
+    .lower-third-name {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .lower-third-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #29ABE2;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .lower-third-handle {
+      font-size: 26px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .lower-third-accent-bar {
+      width: 80px;
+      height: 4px;
+      background: #29ABE2;
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+
+    /* ── CTA end card ── */
+    .cta-card {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      bottom: 240px;
+      background: #29ABE2;
+      border-radius: 20px;
+      padding: 32px 40px;
+      font-family: 'Montserrat', sans-serif;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: 0 0 60px rgba(41,171,226,0.6), 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .cta-card-dm {
+      font-size: 32px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .cta-card-word {
+      font-size: 80px;
+      font-weight: 900;
+      color: #0a0a0f;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin: 4px 0;
+    }
+    .cta-card-sub {
+      font-size: 26px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Cover frame overlay (shows frame 0 via CSS, fades out) ── */
+    .cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0a0a0f;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .cover-title {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      top: 220px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 100px;
+      line-height: 1;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      text-shadow: 0 0 60px rgba(41,171,226,0.5);
+      opacity: 0;
+    }
+    .cover-sub {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      top: 620px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      color: #29ABE2;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0;
+    }
+    .cover-divider {
+      position: absolute;
+      left: 60px;
+      width: 120px;
+      height: 6px;
+      top: 600px;
+      background: #29ABE2;
+      border-radius: 3px;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+<div
+  id="flip-system"
+  data-composition-id="flip-system"
+  data-start="0"
+  data-width="1080"
+  data-height="1920"
+>
+
+  <!-- ══ BASE: Face-cam video ══ -->
+  <video
+    id="face-cam"
+    src="assets/manny-edited.mp4"
+    data-start="0"
+    data-duration="42.17"
+    data-track-index="0"
+    muted
+  ></video>
+
+  <!-- ══ Always-on vignette + grain ══ -->
+  <div class="clip vignette"
+       data-start="0" data-duration="42.17" data-track-index="1"
+       id="vignette"></div>
+  <div class="clip grain"
+       data-start="0" data-duration="42.17" data-track-index="2"
+       id="grain"></div>
+
+  <!-- ══ CHAPTER BACKLIGHTS ══ -->
+  <!-- Chapter 1: Hook — RED (0–8s) -->
+  <div class="clip backlight backlight-red"
+       data-start="0" data-duration="8" data-track-index="3"
+       id="bl-red"></div>
+
+  <!-- Chapter 2: The Questions / System reveal — GOLD (8–20.5s) -->
+  <div class="clip backlight backlight-gold"
+       data-start="8" data-duration="12.5" data-track-index="3"
+       id="bl-gold"></div>
+
+  <!-- Chapter 3: The Proof — BLUE (20.5–36s) -->
+  <div class="clip backlight backlight-blue"
+       data-start="20.5" data-duration="15.5" data-track-index="3"
+       id="bl-blue"></div>
+
+  <!-- Chapter 4: CTA — BuyersKey Blue intense (36–42.17s) -->
+  <div class="clip backlight backlight-cta"
+       data-start="36" data-duration="6.17" data-track-index="3"
+       id="bl-cta"></div>
+
+
+  <!-- ══ LOWER THIRD — appears at 1s, stays ══ -->
+  <div class="clip lower-third"
+       data-start="1" data-duration="36" data-track-index="4"
+       id="lower-third">
+    <div class="lower-third-inner">
+      <div class="lower-third-accent-bar"></div>
+      <div class="lower-third-name">Manny Singh</div>
+      <div class="lower-third-title">Principal Buyer's Advocate</div>
+      <div class="lower-third-handle">@propertywithmanny</div>
+    </div>
+  </div>
+
+
+  <!-- ══ KINETIC TEXT SLAMS ══ -->
+
+  <!-- "EVERY WEEK" — t=2.0s -->
+  <div class="clip kinetic-text"
+       data-start="2.0" data-duration="2.0" data-track-index="5"
+       id="kt-every-week"
+       style="top: 180px; font-size: 110px;">
+    EVERY<br><span style="color:#ef4444">WEEK</span>
+  </div>
+
+  <!-- "FLIPPING PROPERTY" — t=4.2s -->
+  <div class="clip kinetic-text"
+       data-start="4.2" data-duration="2.0" data-track-index="5"
+       id="kt-flipping"
+       style="top: 140px; font-size: 96px;">
+    FLIPPING<br><span style="color:#29ABE2">PROPERTY?</span>
+  </div>
+
+  <!-- "5 QUESTIONS. ONE SYSTEM." — t=8.0s -->
+  <div class="clip kinetic-text"
+       data-start="8.0" data-duration="2.2" data-track-index="5"
+       id="kt-5q"
+       style="top: 160px; font-size: 72px; line-height:1.1;">
+    5 QUESTIONS.<br><span style="color:#C9A24C">ONE SYSTEM.</span>
+  </div>
+
+  <!-- "FIND THE DEAL?" — t=8.5s overlapping with captions, short -->
+  <!-- Skipped in kinetic — covered by caption; too cluttered -->
+
+  <!-- "THIS IS A FULL SYSTEM" — t=18.5s BIG slam -->
+  <div class="clip kinetic-text"
+       data-start="18.5" data-duration="2.0" data-track-index="5"
+       id="kt-full-system"
+       style="top: 150px; font-size: 88px; line-height:1.0;">
+    THIS IS A<br><span style="color:#29ABE2">FULL SYSTEM.</span>
+  </div>
+
+  <!-- "3 PROPERTIES FRANKSTON" — t=22s -->
+  <div class="clip kinetic-text"
+       data-start="22.0" data-duration="2.5" data-track-index="5"
+       id="kt-frankston"
+       style="top: 150px; font-size: 80px; line-height:1.1;">
+    3 PROPERTIES<br><span style="color:#29ABE2">FRANKSTON</span>
+  </div>
+
+  <!-- "ONE CAME OUT ON TOP" — t=30.5s -->
+  <div class="clip kinetic-text"
+       data-start="30.5" data-duration="2.0" data-track-index="5"
+       id="kt-top"
+       style="top: 150px; font-size: 82px; line-height:1.0;">
+    ONE CAME<br><span style="color:#C9A24C">OUT ON TOP</span>
+  </div>
+
+  <!-- "THE NUMBERS WORK" — t=33s -->
+  <div class="clip kinetic-text"
+       data-start="33.0" data-duration="2.0" data-track-index="5"
+       id="kt-numbers"
+       style="top: 160px; font-size: 90px; line-height:1.0;">
+    THE<br>NUMBERS<br><span style="color:#22c55e">WORK ✓</span>
+  </div>
+
+
+  <!-- ══ B-ROLL DATA CARDS ══ -->
+
+  <!-- Frankston suburb stats card — appears at t=23s during "across three properties in Frankston" -->
+  <div class="clip data-card"
+       data-start="23.0" data-duration="5.5" data-track-index="6"
+       id="card-frankston"
+       style="top: 700px;">
+    <div class="data-card-label">📍 Frankston, VIC 3199</div>
+    <div class="data-card-title">Suburb Snapshot</div>
+    <div class="data-row">
+      <span class="data-row-key">Median House</span>
+      <span class="data-row-val accent">$770K</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-key">12-Mo Growth</span>
+      <span class="data-row-val positive">+6.2%</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-key">Days on Market</span>
+      <span class="data-row-val">28 days</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-key">Reno Uplift Potential</span>
+      <span class="data-row-val positive">HIGH</span>
+    </div>
+  </div>
+
+  <!-- Deal analysis card — t=31s "one property came out on top" -->
+  <div class="clip data-card"
+       data-start="31.0" data-duration="4.0" data-track-index="6"
+       id="card-deal"
+       style="top: 720px; border-color: #C9A24C; box-shadow: 0 0 60px rgba(201,162,76,0.3), 0 20px 60px rgba(0,0,0,0.6);">
+    <div class="data-card-label" style="color:#C9A24C;">🏆 Winner — Deal Analysis</div>
+    <div class="data-card-title">The Numbers Work</div>
+    <div class="data-row">
+      <span class="data-row-key">Reno Scope</span>
+      <span class="data-row-val accent">CLEAN</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-key">Margin</span>
+      <span class="data-row-val positive">POSITIVE</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-key">Status</span>
+      <span class="data-row-val" style="color:#C9A24C;">MOVING ✓</span>
+    </div>
+  </div>
+
+
+  <!-- ══ CAPTIONS ══ -->
+
+  <!-- 1: 0–2.0s -->
+  <div class="clip caption"
+       data-start="0.1" data-duration="1.9" data-track-index="7"
+       id="cap-01"
+       style="bottom: 400px;">
+    Hey guys, this is <span class="hl">Manny</span><br>from BuyersKey.
+  </div>
+
+  <!-- 2: 2–4s -->
+  <div class="clip caption"
+       data-start="2.0" data-duration="2.0" data-track-index="7"
+       id="cap-02"
+       style="bottom: 400px;">
+    Every week someone asks me…
+  </div>
+
+  <!-- 3: 4–6.5s -->
+  <div class="clip caption"
+       data-start="4.0" data-duration="2.5" data-track-index="7"
+       id="cap-03"
+       style="bottom: 400px;">
+    How do I get into<br><span class="hl-red">flipping property?</span>
+  </div>
+
+  <!-- 4: 6.5–8s -->
+  <div class="clip caption"
+       data-start="6.5" data-duration="1.5" data-track-index="7"
+       id="cap-04"
+       style="bottom: 400px;">
+    And they always ask<br>the same thing.
+  </div>
+
+  <!-- 5: 8–9.5s -->
+  <div class="clip caption"
+       data-start="8.0" data-duration="1.5" data-track-index="7"
+       id="cap-05"
+       style="bottom: 400px;">
+    How do I <span class="hl">find the deal?</span>
+  </div>
+
+  <!-- 6: 9.5–11.5s -->
+  <div class="clip caption"
+       data-start="9.5" data-duration="2.0" data-track-index="7"
+       id="cap-06"
+       style="bottom: 400px;">
+    How do I know what the<br><span class="hl-gold">renovation costs</span> are?
+  </div>
+
+  <!-- 7: 11.5–13.5s -->
+  <div class="clip caption"
+       data-start="11.5" data-duration="2.0" data-track-index="7"
+       id="cap-07"
+       style="bottom: 400px;">
+    How do I <span class="hl-gold">fund it</span> if I<br>don't have enough cash?
+  </div>
+
+  <!-- 8: 13.5–15s -->
+  <div class="clip caption"
+       data-start="13.5" data-duration="1.5" data-track-index="7"
+       id="cap-08"
+       style="bottom: 400px;">
+    Where do I find<br><span class="hl-gold">the trades?</span>
+  </div>
+
+  <!-- 9: 15–17s -->
+  <div class="clip caption"
+       data-start="15.0" data-duration="2.0" data-track-index="7"
+       id="cap-09"
+       style="bottom: 400px;">
+    How do I know<br><span class="hl-red">when to walk away?</span>
+  </div>
+
+  <!-- 10: 17–18.5s -->
+  <div class="clip caption"
+       data-start="17.0" data-duration="1.5" data-track-index="7"
+       id="cap-10"
+       style="bottom: 400px;">
+    This is not just<br>one question.
+  </div>
+
+  <!-- 11: 18.5–20.5s -->
+  <div class="clip caption"
+       data-start="18.5" data-duration="2.0" data-track-index="7"
+       id="cap-11"
+       style="bottom: 400px;">
+    This is a <span class="hl">FULL SYSTEM.</span>
+  </div>
+
+  <!-- 12: 20.5–23s -->
+  <div class="clip caption"
+       data-start="20.5" data-duration="2.5" data-track-index="7"
+       id="cap-12"
+       style="bottom: 400px;">
+    Today I ran that entire system<br>across <span class="hl">3 properties</span>
+  </div>
+
+  <!-- 13: 23–26s -->
+  <div class="clip caption"
+       data-start="23.0" data-duration="3.0" data-track-index="7"
+       id="cap-13"
+       style="bottom: 400px;">
+    in <span class="hl">Frankston</span><br>with a builder by my side.
+  </div>
+
+  <!-- 14: 26–28s -->
+  <div class="clip caption"
+       data-start="26.0" data-duration="2.0" data-track-index="7"
+       id="cap-14"
+       style="bottom: 400px;">
+    He called the scope<br>on site.
+  </div>
+
+  <!-- 15: 28–30.5s -->
+  <div class="clip caption"
+       data-start="28.0" data-duration="2.5" data-track-index="7"
+       id="cap-15"
+       style="bottom: 400px;">
+    I ran the numbers before<br>anyone made an offer.
+  </div>
+
+  <!-- 16: 30.5–32s -->
+  <div class="clip caption"
+       data-start="30.5" data-duration="1.5" data-track-index="7"
+       id="cap-16"
+       style="bottom: 400px;">
+    <span class="hl-gold">One property</span><br>came out on top.
+  </div>
+
+  <!-- 17: 32–34s -->
+  <div class="clip caption"
+       data-start="32.0" data-duration="2.0" data-track-index="7"
+       id="cap-17"
+       style="bottom: 400px;">
+    The reno is <span class="hl">clean.</span><br>The numbers <span class="hl-gold">work.</span>
+  </div>
+
+  <!-- 18: 34–36s -->
+  <div class="clip caption"
+       data-start="34.0" data-duration="2.0" data-track-index="7"
+       id="cap-18"
+       style="bottom: 400px;">
+    That deal<br><span class="hl">will be moving.</span>
+  </div>
+
+  <!-- 19: 36–38s -->
+  <div class="clip caption"
+       data-start="36.0" data-duration="2.0" data-track-index="7"
+       id="cap-19"
+       style="bottom: 400px;">
+    This is what I do<br>for my clients.
+  </div>
+
+  <!-- 20: 38–40s -->
+  <div class="clip caption"
+       data-start="38.0" data-duration="2.0" data-track-index="7"
+       id="cap-20"
+       style="bottom: 400px;">
+    If you want this done<br>for your next deal —
+  </div>
+
+  <!-- 21: 40–41.5s -->
+  <div class="clip caption"
+       data-start="40.0" data-duration="1.5" data-track-index="7"
+       id="cap-21"
+       style="bottom: 400px;">
+    DM me the word<br><span class="hl" style="font-size:1.2em">FLIP</span>
+  </div>
+
+  <!-- 22: 41.5–42.17s -->
+  <div class="clip caption"
+       data-start="41.5" data-duration="0.67" data-track-index="7"
+       id="cap-22"
+       style="bottom: 400px;">
+    and I'll help you out. 🙌
+  </div>
+
+
+  <!-- ══ CTA END CARD ══ -->
+  <div class="clip cta-card"
+       data-start="38.5" data-duration="3.67" data-track-index="8"
+       id="cta-card">
+    <div class="cta-card-dm">DM me the word</div>
+    <div class="cta-card-word">FLIP</div>
+    <div class="cta-card-sub">@propertywithmanny</div>
+  </div>
+
+
+  <!-- ══ SFX AUDIO ══ -->
+
+  <!-- Boom on open -->
+  <audio src="../../assets/sfx/impact/boom.mp3"
+         data-start="0.0" data-duration="2.78" data-track-index="9"
+         data-volume="0.18"></audio>
+
+  <!-- Whoosh on "EVERY WEEK" slam -->
+  <audio src="../../assets/sfx/transitions/whoosh.mp3"
+         data-start="2.0" data-duration="0.57" data-track-index="9"
+         data-volume="0.22"></audio>
+
+  <!-- Whoosh on "FLIPPING PROPERTY" slam -->
+  <audio src="../../assets/sfx/transitions/whoosh.mp3"
+         data-start="4.2" data-duration="0.57" data-track-index="10"
+         data-volume="0.20"></audio>
+
+  <!-- Hard cut on chapter 2 transition -->
+  <audio src="../../assets/sfx/transitions/hard-cut.mp3"
+         data-start="8.0" data-duration="0.20" data-track-index="11"
+         data-volume="0.25"></audio>
+
+  <!-- Whoosh on "5 QUESTIONS" -->
+  <audio src="../../assets/sfx/transitions/whoosh.mp3"
+         data-start="8.0" data-duration="0.57" data-track-index="12"
+         data-volume="0.18"></audio>
+
+  <!-- Stinger on "THIS IS A FULL SYSTEM" -->
+  <audio src="../../assets/sfx/impact/stinger.mp3"
+         data-start="18.5" data-duration="2.0" data-track-index="9"
+         data-volume="0.20"></audio>
+
+  <!-- Hard cut chapter 3 -->
+  <audio src="../../assets/sfx/transitions/hard-cut.mp3"
+         data-start="20.5" data-duration="0.20" data-track-index="10"
+         data-volume="0.25"></audio>
+
+  <!-- Slam on Frankston card reveal -->
+  <audio src="../../assets/sfx/impact/slam.mp3"
+         data-start="23.0" data-duration="1.22" data-track-index="11"
+         data-volume="0.22"></audio>
+
+  <!-- Bass drop on "ONE CAME OUT ON TOP" -->
+  <audio src="../../assets/sfx/impact/bass-drop.mp3"
+         data-start="30.5" data-duration="1.10" data-track-index="9"
+         data-volume="0.28"></audio>
+
+  <!-- Slam on deal card -->
+  <audio src="../../assets/sfx/impact/slam.mp3"
+         data-start="31.0" data-duration="1.22" data-track-index="10"
+         data-volume="0.20"></audio>
+
+  <!-- Sparkle on "THE NUMBERS WORK" -->
+  <audio src="../../assets/sfx/cinematic/sparkle.mp3"
+         data-start="33.0" data-duration="2.04" data-track-index="11"
+         data-volume="0.22"></audio>
+
+  <!-- Boom + whoosh on CTA -->
+  <audio src="../../assets/sfx/impact/boom.mp3"
+         data-start="38.5" data-duration="1.5" data-track-index="9"
+         data-volume="0.20"></audio>
+
+  <!-- Notification ping on CTA card -->
+  <audio src="../../assets/sfx/ui/notification.mp3"
+         data-start="38.8" data-duration="0.50" data-track-index="10"
+         data-volume="0.30"></audio>
+
+  <!-- Music bed under whole video (low level) -->
+  <audio src="../../assets/music/music-bed-cinematic-tech.mp3"
+         data-start="0" data-duration="42.17" data-track-index="13"
+         data-volume="0.06"></audio>
+
+
+</div><!-- end #flip-system -->
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const tl = gsap.timeline({ paused: true });
+
+  /* ─── helpers ─── */
+  function slam(target, atTime, outTime) {
+    tl.fromTo(target,
+      { opacity: 0, scale: 1.35, filter: 'blur(4px)' },
+      { opacity: 1, scale: 1,    filter: 'blur(0px)', duration: 0.12, ease: 'back.out(3)' },
+      atTime
+    );
+    if (outTime !== undefined) {
+      tl.to(target, { opacity: 0, scale: 0.92, filter: 'blur(3px)', duration: 0.10, ease: 'power2.in' }, outTime - 0.10);
+    }
+  }
+
+  function captionIn(target, atTime, outTime) {
+    tl.fromTo(target,
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.15, ease: 'power2.out' },
+      atTime
+    );
+    tl.to(target,
+      { opacity: 0, y: -8, duration: 0.12, ease: 'power2.in' },
+      outTime - 0.12
+    );
+  }
+
+  function cardIn(target, atTime, outTime) {
+    tl.fromTo(target,
+      { opacity: 0, x: 80, scale: 0.96 },
+      { opacity: 1, x: 0,  scale: 1,    duration: 0.35, ease: 'back.out(1.8)' },
+      atTime
+    );
+    tl.to(target,
+      { opacity: 0, x: -60, duration: 0.25, ease: 'power2.in' },
+      outTime - 0.25
+    );
+  }
+
+  function lowerThirdIn(target, atTime) {
+    tl.fromTo(target,
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+      atTime
+    );
+    tl.to(target,
+      { opacity: 0, y: 30, duration: 0.4, ease: 'power2.in' },
+      36.8
+    );
+  }
+
+  /* ─── Chapter backlights ─── */
+  // Red chapter — fade in
+  tl.fromTo('#bl-red',   { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0);
+  tl.to('#bl-red',       { opacity: 0, duration: 0.5 }, 7.5);
+  // Gold chapter
+  tl.fromTo('#bl-gold',  { opacity: 0 }, { opacity: 1, duration: 0.6 }, 8.0);
+  tl.to('#bl-gold',      { opacity: 0, duration: 0.5 }, 20.0);
+  // Blue chapter
+  tl.fromTo('#bl-blue',  { opacity: 0 }, { opacity: 1, duration: 0.6 }, 20.5);
+  tl.to('#bl-blue',      { opacity: 0, duration: 0.5 }, 35.5);
+  // CTA chapter
+  tl.fromTo('#bl-cta',   { opacity: 0 }, { opacity: 1, duration: 0.8 }, 36.0);
+  tl.to('#bl-cta',       { opacity: 0, duration: 0.5 }, 41.8);
+
+  /* ─── Vignette + grain always on ─── */
+  tl.set('#vignette', { opacity: 1 }, 0);
+  tl.set('#grain',    { opacity: 1 }, 0);
+
+  /* ─── Lower third ─── */
+  lowerThirdIn('#lower-third', 1.0);
+
+  /* ─── Kinetic text slams ─── */
+  slam('#kt-every-week',  2.0,  4.0);
+  slam('#kt-flipping',    4.2,  6.2);
+  slam('#kt-5q',          8.0, 10.2);
+  slam('#kt-full-system', 18.5, 20.5);
+  slam('#kt-frankston',   22.0, 24.5);
+  slam('#kt-top',         30.5, 32.5);
+  slam('#kt-numbers',     33.0, 35.0);
+
+  /* ─── Captions ─── */
+  captionIn('#cap-01',  0.1,  1.9);
+  captionIn('#cap-02',  2.0,  4.0);
+  captionIn('#cap-03',  4.0,  6.5);
+  captionIn('#cap-04',  6.5,  8.0);
+  captionIn('#cap-05',  8.0,  9.5);
+  captionIn('#cap-06',  9.5, 11.5);
+  captionIn('#cap-07', 11.5, 13.5);
+  captionIn('#cap-08', 13.5, 15.0);
+  captionIn('#cap-09', 15.0, 17.0);
+  captionIn('#cap-10', 17.0, 18.5);
+  captionIn('#cap-11', 18.5, 20.5);
+  captionIn('#cap-12', 20.5, 23.0);
+  captionIn('#cap-13', 23.0, 26.0);
+  captionIn('#cap-14', 26.0, 28.0);
+  captionIn('#cap-15', 28.0, 30.5);
+  captionIn('#cap-16', 30.5, 32.0);
+  captionIn('#cap-17', 32.0, 34.0);
+  captionIn('#cap-18', 34.0, 36.0);
+  captionIn('#cap-19', 36.0, 38.0);
+  captionIn('#cap-20', 38.0, 40.0);
+  captionIn('#cap-21', 40.0, 41.5);
+  captionIn('#cap-22', 41.5, 42.1);
+
+  /* ─── B-roll data cards ─── */
+  cardIn('#card-frankston', 23.0, 28.5);
+  cardIn('#card-deal',      31.0, 35.0);
+
+  /* ─── CTA card ─── */
+  tl.fromTo('#cta-card',
+    { opacity: 0, scale: 0.85, y: 40 },
+    { opacity: 1, scale: 1,    y: 0,  duration: 0.4, ease: 'back.out(2)' },
+    38.5
+  );
+  // Pulse the CTA card
+  tl.to('#cta-card', { scale: 1.03, duration: 0.4, yoyo: true, repeat: 2, ease: 'power1.inOut' }, 39.2);
+
+  /* ─── Duration anchor ─── */
+  tl.set({}, {}, 42.17);
+
+  /* ─── Register ─── */
+  window.__timelines = window.__timelines || {};
+  window.__timelines['flip-system'] = tl;
+}());
+</script>
+</body>
+</html>

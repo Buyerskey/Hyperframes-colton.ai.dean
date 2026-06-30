@@ -1,0 +1,20 @@
+:root {
+  /* BuyersKey — Manny Singh (@propertywithmanny) */
+  /* Extracted from logo, business card, and awards imagery */
+
+  --brand-bg: #0a0a0f;           /* near-black canvas — video default */
+  --brand-surface: #111827;      /* dark surface cards */
+  --brand-surface-2: #1e2a38;    /* slightly lighter surface */
+  --brand-border: #29ABE2;       /* BuyersKey sky blue — border/divider */
+  --brand-accent: #29ABE2;       /* BuyersKey sky blue — primary accent */
+  --brand-accent-glow: #29ABE266; /* sky blue at 40% opacity for glows */
+  --brand-gold: #C9A24C;         /* ABAA awards gold — prestige accent */
+  --brand-warn: #ef4444;         /* red — for contrast/urgency moments */
+  --brand-text: #ffffff;         /* primary text */
+  --brand-text-dim: #94a3b8;     /* secondary/muted text */
+
+  /* Typography */
+  --font-mono: ui-monospace, Menlo, monospace;
+  --font-display: 'Montserrat', system-ui, sans-serif; /* matches BuyersKey wordmark weight */
+  --font-display-weight: 900;    /* Black weight — as used in logo */
+}
