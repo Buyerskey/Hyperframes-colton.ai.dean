@@ -4,7 +4,7 @@ Your identity, positioning, and workflow for video work in this workspace. **Rea
 
 ## Identity
 
-- **Name on-screen**: Manny | BuyersKey
+- **Name on-screen**: Manny Singh | BuyersKey
 - **Instagram**: @propertywithmanny
 - **TikTok**: —
 - **YouTube**: —
@@ -36,7 +36,19 @@ Mixed workflow depending on the video:
 
 ## Brand identity
 
-_(Colors, fonts, logo. Often a blank slate at the start — `assets/brand-tokens.css` fills in over time. Set initial values during /setup.)_
+- **Primary accent**: `#29ABE2` — BuyersKey sky blue
+- **Gold accent**: `#C9A24C` — awards/prestige moments
+- **Canvas**: `#0a0a0f` — near-black for video backgrounds
+- **Text**: `#ffffff` on dark, `#0a0a0a` on blue
+- **Display font**: Montserrat Black (900 weight) — matches the BuyersKey wordmark
+- **Tagline**: "Unlocking Wealth"
+- **Business title**: Principal Buyer's Advocate
+- **Website**: www.buyerskey.com.au
+- **Phone**: 0438 941 033
+- **Address**: 418 Church St, Richmond VIC 3121
+- **Credential**: ABAA Finalist — Start-Up Buyers Agency of the Year 2026
+
+Full token values in `assets/brand-tokens.css`.
 
 ## Inspiration creators
 
